@@ -63,7 +63,7 @@ build-nobatch-standard:
     - SKIP_TESTS2=$SKIP_TESTS2"|H5TEST-set_extent"
     - SKIP_TESTS2=$SKIP_TESTS2"|H5TEST-testhdf5-base"
     - SKIP_TESTS2=$SKIP_TESTS2"'"
-    - ctest -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-ascent",BUILD_GENERATOR=Unix,LOCAL_SUBMIT=true ${SKIP_TESTS} ${SKIP_TESTS2} -C Release -VV --timeout 1800
+    - ctest -S HDF5config.cmake,SITE_BUILDNAME_SUFFIX="1.13.0-ascent",BUILD_GENERATOR=Unix,LOCAL_SUBMIT=false ${SKIP_TESTS} ${SKIP_TESTS2} -C Release -VV --timeout 1800
 #      look at the dirs to see how the build worked
     - echo $PWD
 #   - cd ..
