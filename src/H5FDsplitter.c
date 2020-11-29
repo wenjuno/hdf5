@@ -94,7 +94,7 @@ typedef struct H5FD_splitter_t {
     } while (0)
 #else
 #define H5FD_SPLITTER_LOG_CALL(name) /* no-op */
-#endif                               /* H5FD_SPLITTER_DEBUG_OP_CALLS */
+#endif /* H5FD_SPLITTER_DEBUG_OP_CALLS */
 
 /* Private functions */
 
@@ -210,7 +210,7 @@ H5FD_splitter_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     H5FD_SPLITTER_LOG_CALL(FUNC);
 
@@ -297,7 +297,7 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
     herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Dr", fapl_id, vfd_config);
+    H5TRACE2("e", "i*#", fapl_id, vfd_config);
 
     H5FD_SPLITTER_LOG_CALL(FUNC);
 
@@ -369,39 +369,39 @@ done:
  * Function:    H5Pget_fapl_splitter
  *
  * Purpose:     Returns information about the splitter file access property
- *              list through the structure config_out.
+ *              list through the structure config.
  *
- *              Will fail if config_out is received without pre-set valid
+ *              Will fail if config is received without pre-set valid
  *              magic and version information.
  *
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_out)
+H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config /*out*/)
 {
     const H5FD_splitter_fapl_t *fapl_ptr  = NULL;
     H5P_genplist_t *            plist_ptr = NULL;
     herr_t                      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Dr", fapl_id, config_out);
+    H5TRACE2("e", "ix", fapl_id, config);
 
     H5FD_SPLITTER_LOG_CALL(FUNC);
 
     /* Check arguments */
     if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if (config_out == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_out pointer is null")
-    if (H5FD_SPLITTER_MAGIC != config_out->magic)
+    if (config == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config pointer is null")
+    if (H5FD_SPLITTER_MAGIC != config->magic)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "info-out pointer invalid (magic number mismatch)")
-    if (H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION != config_out->version)
+    if (H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION != config->version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "info-out pointer invalid (version unsafe)")
 
     /* Pre-set out FAPL IDs with intent to replace these values */
-    config_out->rw_fapl_id = H5I_INVALID_HID;
-    config_out->wo_fapl_id = H5I_INVALID_HID;
+    config->rw_fapl_id = H5I_INVALID_HID;
+    config->wo_fapl_id = H5I_INVALID_HID;
 
     /* Check and get the splitter fapl */
     if (NULL == (plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -411,14 +411,14 @@ H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_out)
     if (NULL == (fapl_ptr = (const H5FD_splitter_fapl_t *)H5P_peek_driver_info(plist_ptr)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to get specific-driver info")
 
-    HDstrncpy(config_out->wo_path, fapl_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
-    HDstrncpy(config_out->log_file_path, fapl_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
-    config_out->ignore_wo_errs = fapl_ptr->ignore_wo_errs;
+    HDstrncpy(config->wo_path, fapl_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
+    HDstrncpy(config->log_file_path, fapl_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
+    config->ignore_wo_errs = fapl_ptr->ignore_wo_errs;
 
     /* Copy R/W and W/O FAPLs */
-    if (H5FD__copy_plist(fapl_ptr->rw_fapl_id, &(config_out->rw_fapl_id)) < 0)
+    if (H5FD__copy_plist(fapl_ptr->rw_fapl_id, &(config->rw_fapl_id)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't copy R/W FAPL");
-    if (H5FD__copy_plist(fapl_ptr->wo_fapl_id, &(config_out->wo_fapl_id)) < 0)
+    if (H5FD__copy_plist(fapl_ptr->wo_fapl_id, &(config->wo_fapl_id)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't copy W/O FAPL");
 
 done:
@@ -585,7 +585,7 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
     if (NULL == new_fa_ptr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
-    HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
+    H5MM_memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
     HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
     HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
 
@@ -1300,14 +1300,14 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
         char * s;
 
         size = HDstrlen(atfunc) + HDstrlen(msg) + 3; /* ':', ' ', '\n' */
-        s    = (char *)HDmalloc(sizeof(char) * (size + 1));
+        s    = (char *)H5MM_malloc(sizeof(char) * (size + 1));
         if (NULL == s)
             ret_value = FAIL;
         else if (size < (size_t)HDsnprintf(s, size + 1, "%s: %s\n", atfunc, msg))
             ret_value = FAIL;
         else if (size != HDfwrite(s, 1, size, file->logfp))
             ret_value = FAIL;
-        HDfree(s);
+        H5MM_free(s);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

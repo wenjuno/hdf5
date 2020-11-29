@@ -306,14 +306,14 @@ H5E__set_default_auto(H5E_t *stk)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
     stk->auto_op.vers = 1;
-#else  /* H5_USE_16_API */
+#else /* H5_USE_16_API */
     stk->auto_op.vers = 2;
 #endif /* H5_USE_16_API_DEFAULT */
 
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
     stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
     stk->auto_op.is_default                         = TRUE;
-#else  /* H5_NO_DEPRECATED_SYMBOLS */
+#else /* H5_NO_DEPRECATED_SYMBOLS */
     stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -575,13 +575,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Eget_class_name(hid_t class_id, char *name, size_t size)
+H5Eget_class_name(hid_t class_id, char *name /*out*/, size_t size)
 {
     H5E_cls_t *cls;            /* Pointer to error class */
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*sz", class_id, name, size);
+    H5TRACE3("Zs", "ixz", class_id, name, size);
 
     /* Get the error class */
     if (NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
@@ -836,13 +836,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
+H5Eget_msg(hid_t msg_id, H5E_type_t *type /*out*/, char *msg_str /*out*/, size_t size)
 {
     H5E_msg_t *msg;            /* Pointer to error message */
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR((-1))
-    H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
+    H5TRACE4("Zs", "ixxz", msg_id, type, msg_str, size);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
@@ -1318,6 +1318,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+H5_ATTR_FORMAT(printf, 8, 9)
 herr_t
 H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
          hid_t min_id, const char *fmt, ...)
@@ -1524,14 +1525,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
+H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*out*/)
 {
     H5E_t *       estack;              /* Error stack to operate on */
     H5E_auto_op_t op;                  /* Error stack function */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*x**x", estack_id, func, client_data);
+    H5TRACE3("e", "ixx", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
@@ -1589,7 +1590,7 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE3("e", "ix*x", estack_id, func, client_data);
+    H5TRACE3("e", "iEA*x", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in

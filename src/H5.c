@@ -14,6 +14,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -55,6 +56,9 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -85,6 +89,33 @@ H5_debug_t     H5_debug_g; /* debugging info */
 /*******************/
 
 /*--------------------------------------------------------------------------
+NAME
+    H5__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
+herr_t
+H5__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Run the library initialization routine, if it hasn't already ran */
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
+        if (H5_init_library() < 0)
+            HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5__init_package() */
+
+/*--------------------------------------------------------------------------
  * NAME
  *   H5_init_library -- Initialize library-global information
  * USAGE
@@ -102,6 +133,11 @@ herr_t
 H5_init_library(void)
 {
     herr_t ret_value = SUCCEED;
+
+    /* Set the 'library initialized' flag as early as possible, to avoid
+     * possible re-entrancy.
+     */
+    H5_INIT_GLOBAL = TRUE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -336,6 +372,7 @@ H5_term_library(void)
          */
         if (pending == 0) {
             pending += DOWN(AC);
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);
@@ -367,7 +404,7 @@ H5_term_library(void)
             HDfprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
-#endif    /* NDEBUG */
+#endif /* NDEBUG */
         } /* end if */
     }     /* end if */
 
@@ -560,12 +597,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size)
+H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t *blk_size /*out*/,
+                      size_t *fac_size /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+    H5TRACE4("e", "xxxx", reg_size, arr_size, blk_size, fac_size);
 
     /* Call the free list function to actually get the sizes */
     if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
@@ -600,12 +638,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats)
+H5get_alloc_stats(H5_alloc_stats_t *stats /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*x", stats);
+    H5TRACE1("e", "x", stats);
 
     /* Call the internal allocation stat routine to get the values */
     if (H5MM_get_alloc_stats(stats) < 0)
@@ -763,12 +801,12 @@ H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void 
  *-------------------------------------------------------------------------
  */
 herr_t
-H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *relnum)
+H5get_libversion(unsigned *majnum /*out*/, unsigned *minnum /*out*/, unsigned *relnum /*out*/)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "*Iu*Iu*Iu", majnum, minnum, relnum);
+    H5TRACE3("e", "xxx", majnum, minnum, relnum);
 
     /* Set the version information */
     if (majnum)
@@ -1079,7 +1117,7 @@ H5is_library_threadsafe(hbool_t *is_ts)
     /* At this time, it is impossible for this to fail. */
 #ifdef H5_HAVE_THREADSAFE
     *is_ts = TRUE;
-#else  /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE */
     *is_ts = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
 

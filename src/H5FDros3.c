@@ -320,7 +320,7 @@ H5FD_ros3_init(void)
     unsigned int bin_i;
 #endif
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
@@ -340,7 +340,6 @@ H5FD_ros3_init(void)
     }
 #endif
 
-    /* Set return value */
     ret_value = H5FD_ROS3_g;
 
 done:
@@ -395,7 +394,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
     herr_t          ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa);
+    H5TRACE2("e", "i*#", fapl_id, fa);
 
     HDassert(fa != NULL);
 
@@ -473,21 +472,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out)
+H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst /*out*/)
 {
-    const H5FD_ros3_fapl_t *fa        = NULL;
+    const H5FD_ros3_fapl_t *fa_src    = NULL;
     H5P_genplist_t *        plist     = NULL;
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "ix", fapl_id, fa_dst);
 
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5Pget_fapl_ros3() called.\n");
 #endif
 
-    if (fa_out == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL")
+    if (fa_dst == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst is NULL")
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
@@ -496,12 +495,12 @@ H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out)
     if (H5FD_ROS3 != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
-    fa = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist);
-    if (fa == NULL)
+    fa_src = (const H5FD_ros3_fapl_t *)H5P_peek_driver_info(plist);
+    if (fa_src == NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Copy the ros3 fapl data out */
-    HDmemcpy(fa_out, fa, sizeof(H5FD_ros3_fapl_t));
+    H5MM_memcpy(fa_dst, fa_src, sizeof(H5FD_ros3_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -536,7 +535,7 @@ H5FD__ros3_fapl_get(H5FD_t *_file)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the fields of the structure */
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_ros3_fapl_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_ros3_fapl_t));
 
     /* Set return value */
     ret_value = fa;
@@ -576,7 +575,7 @@ H5FD__ros3_fapl_copy(const void *_old_fa)
     if (new_fa == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_ros3_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_ros3_fapl_t));
     ret_value = new_fa;
 
 done:
@@ -769,7 +768,7 @@ H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
     file->s3r_handle = handle;
-    HDmemcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
+    H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_ros3_fapl_t));
 
 #if ROS3_STATS
     if (FAIL == ros3_reset_stats(file))

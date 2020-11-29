@@ -20,6 +20,9 @@
  *             File System (HDFS).
  */
 
+/* This source code file is part of the H5FD driver module */
+#include "H5FDdrvr_module.h"
+
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
 #include "H5FDprivate.h" /* File drivers             */
@@ -29,9 +32,6 @@
 #include "H5MMprivate.h" /* Memory management        */
 
 #ifdef H5_HAVE_LIBHDFS
-
-/* This source code file is part of the H5FD driver module */
-#include "H5FDdrvr_module.h"
 
 /* HDFS routines */
 #include "hdfs.h"
@@ -231,8 +231,7 @@ typedef struct {
  *
  * Programmer: Jacob Smith
  *
- ***************************************************************************
- */
+ ***************************************************************************/
 typedef struct H5FD_hdfs_t {
     H5FD_t           pub;
     H5FD_hdfs_fapl_t fa;
@@ -357,12 +356,12 @@ done:
 hid_t
 H5FD_hdfs_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;
 #if HDFS_STATS
     unsigned int bin_i;
 #endif
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", FUNC);
@@ -379,7 +378,7 @@ H5FD_hdfs_init(void)
 
         HDFS_STATS_POW(bin_i, &value)
         hdfs_stats_boundaries[bin_i] = value;
-    } /* end for */
+    }
 #endif
 
     ret_value = H5FD_HDFS_g;
@@ -593,7 +592,7 @@ done:
  * Function:    H5Pset_fapl_hdfs
  *
  * Purpose:     Modify the file access property list to use the H5FD_HDFS
- *              driver defined in this source file.  All driver specfic
+ *              driver defined in this source file.  All driver specific
  *              properties are passed in as a pointer to a suitably
  *              initialized instance of H5FD_hdfs_fapl_t
  *
@@ -611,7 +610,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     herr_t          ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa);
+    H5TRACE2("e", "i*#", fapl_id, fa);
 
     HDassert(fa != NULL);
 
@@ -647,33 +646,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_out)
+H5Pget_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa_dst /*out*/)
 {
-    const H5FD_hdfs_fapl_t *fa        = NULL;
+    const H5FD_hdfs_fapl_t *fa_src    = NULL;
     H5P_genplist_t *        plist     = NULL;
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, fa_out);
+    H5TRACE2("e", "ix", fapl_id, fa_dst);
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
-    if (fa_out == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_out is NULL")
+    if (fa_dst == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "fa_dst ptr is NULL")
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+
     if (H5FD_HDFS != H5P_peek_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
-    fa = (const H5FD_hdfs_fapl_t *)H5P_peek_driver_info(plist);
-    if (fa == NULL)
+    fa_src = (const H5FD_hdfs_fapl_t *)H5P_peek_driver_info(plist);
+    if (fa_src == NULL)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Copy the hdfs fapl data out */
-    HDmemcpy(fa_out, fa, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fs_dst, fa_src, sizeof(H5FD_hdfs_fapl_t));
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -708,7 +708,7 @@ H5FD__hdfs_fapl_get(H5FD_t *_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Copy the fields of the structure */
-    HDmemcpy(fa, &(file->fa), sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(fa, &(file->fa), sizeof(H5FD_hdfs_fapl_t));
 
     ret_value = fa;
 
@@ -746,7 +746,7 @@ H5FD__hdfs_fapl_copy(const void *_old_fa)
     if (new_fa == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-    HDmemcpy(new_fa, old_fa, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(new_fa, old_fa, sizeof(H5FD_hdfs_fapl_t));
     ret_value = new_fa;
 
 done:
@@ -813,7 +813,7 @@ hdfs__reset_stats(H5FD_hdfs_t *file)
     FUNC_ENTER_STATIC
 
 #if HDFS_DEBUG
-    HDprintf("hdfs__reset_stats() called\n");
+    HDfprintf(stdout, "called %s.\n", FUNC);
 #endif
 
     if (file == NULL)
@@ -903,7 +903,7 @@ H5FD__hdfs_open(const char *path, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     if (file == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
     file->hdfs_handle = handle;
-    HDmemcpy(&(file->fa), &fa, sizeof(H5FD_hdfs_fapl_t));
+    H5MM_memcpy(&(file->fa), &fa, sizeof(H5FD_hdfs_fapl_t));
 
 #if HDFS_STATS
     if (FAIL == hdfs__reset_stats(file))
@@ -1203,8 +1203,8 @@ done:
 static herr_t
 H5FD__hdfs_close(H5FD_t *_file)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1245,8 +1245,8 @@ done:
  *     field-by-field.
  *
  * Return:
- *     + Equivalent:      0
- *     + Not Equivalent: -1
+ *      Equivalent:      0
+ *      Not Equivalent: -1
  *
  * Programmer: Gerd Herber
  *             May 2018
@@ -1470,8 +1470,8 @@ H5FD__hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 static herr_t
 H5FD__hdfs_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1514,9 +1514,9 @@ static herr_t
 H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                 size_t size, void *buf)
 {
-    herr_t       ret_value = SUCCEED;
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
     size_t       filesize  = 0;
+    herr_t       ret_value = SUCCEED;
 #if HDFS_STATS
     /* working variables for storing stats */
     hdfs_statsbin *bin   = NULL;
@@ -1655,7 +1655,7 @@ done:
  *     No effect on Read-Only S3 file.
  *
  *     Suggestion: remove lock/unlock from class
- *               > would result in error at H5FD_[un]lock() (H5FD.c)
+ *                 would result in error at H5FD_[un]lock() (H5FD.c)
  *
  * Return:
  *

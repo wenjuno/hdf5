@@ -12316,7 +12316,7 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     char *  tmpname    = NULL;
     char *  cwdpath    = NULL;
     hbool_t have_posix_compat_vfd; /* Whether VFD used is compatible w/POSIX I/O calls */
-#endif                             /* H5_HAVE_SYMLINK */
+#endif /* H5_HAVE_SYMLINK */
 
     if (new_format)
         TESTING("external links w/symlink files (w/new group format)")
@@ -12570,7 +12570,7 @@ error:
 
     return FAIL;
 
-#else  /* H5_HAVE_SYMLINK */
+#else /* H5_HAVE_SYMLINK */
     SKIPPED();
     HDputs("    Current file system or operating system doesn't support symbolic links");
 
@@ -14138,7 +14138,7 @@ UD_cb_create(const char *link_name, hid_t loc_group, const void *udata, size_t u
     if (lcpl_id < 0)
         TEST_ERROR
 
-    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME))
+    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && HDstrcmp(link_name, NEW_UD_CB_LINK_NAME))
         TEST_ERROR
     if (HDstrcmp((const char *)udata, UD_CB_TARGET))
         TEST_ERROR
@@ -14165,7 +14165,7 @@ UD_cb_traverse(const char *link_name, hid_t cur_group, const void *udata, size_t
     if (udata_size > 0 && !udata)
         TEST_ERROR
 
-    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME))
+    if (HDstrcmp(link_name, UD_CB_LINK_NAME) && HDstrcmp(link_name, NEW_UD_CB_LINK_NAME))
         TEST_ERROR
     if (HDstrcmp((const char *)udata, UD_CB_TARGET))
         TEST_ERROR
@@ -14537,7 +14537,7 @@ lapl_udata(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Now use the same ud link to access group_b */
-    strcpy(group_b_name, "group_b");
+    HDstrcpy(group_b_name, "group_b");
     if (H5Pset(plist_id, DEST_PROP_NAME, group_b_name) < 0)
         TEST_ERROR
 
@@ -14851,7 +14851,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     H5E_END_TRY;
 
     /* Create a user-defined link to the group. */
-    strcpy(group_name, "/group");
+    HDstrcpy(group_name, "/group");
     if (H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1,
                      H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
@@ -19183,7 +19183,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     hsize_t  skip; /* # of links to skip in group */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     int gskip;  /* # of links to skip in group, with H5Giterate */
-#endif          /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t ret; /* Generic return value */
 
     /* Iterate over links in group */
@@ -19291,7 +19291,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
 
         if (nvisit != (max_links / 2))
             TEST_ERROR
-    }  /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Iterate over links in group, stopping in the middle */
@@ -19671,7 +19671,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     hsize_t  skip; /* # of links to skip in group */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     int gskip;  /* # of links to skip in group, with H5Giterate */
-#endif          /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t ret; /* Generic return value */
 
     /* Iterate over links in group */
@@ -19779,7 +19779,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
 
         if (nvisit != (max_links / 2))
             TEST_ERROR
-    }  /* end else */
+    } /* end else */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     /* Iterate over links in group, stopping in the middle */
@@ -22502,12 +22502,12 @@ main(void)
                 nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0; /* requires new format groups */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 nerrors += ud_hard_links_deprec(fapl2) < 0 ? 1 : 0; /* requires new format groups */
-#endif                                                              /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
                 nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;   /* requires new format groups */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                 nerrors += ud_link_reregister_deprec(fapl2) < 0 ? 1 : 0; /* requires new format groups */
-#endif                                                                   /* H5_NO_DEPRECATED_SYMBOLS */
-            }                                                            /* end if */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+            } /* end if */
             nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             nerrors += ud_callbacks_deprec(my_fapl, new_format) < 0 ? 1 : 0;

@@ -243,11 +243,11 @@ do_ranks(hid_t fapl, hbool_t new_format)
 #ifdef H5_HAVE_FILTER_DEFLATE
             if (H5Pset_deflate(dcpl, 9) < 0)
                 TEST_ERROR
-#else     /* H5_HAVE_FILTER_DEFLATE */
+#else /* H5_HAVE_FILTER_DEFLATE */
             if (H5Pclose(dcpl) < 0)
                 TEST_ERROR
             continue;
-#endif    /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE */
         } /* end if */
 
         if (config & CONFIG_FILL) {
@@ -2621,7 +2621,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
         TEST_ERROR
     if (H5Treclaim(type, mspace, H5P_DEFAULT, wbuf) < 0)
         TEST_ERROR
-    free(fill_value.p);
+    HDfree(fill_value.p);
     if (H5Sclose(mspace) < 0)
         TEST_ERROR
     if (H5Pclose(my_dcpl) < 0)

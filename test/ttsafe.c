@@ -60,7 +60,7 @@ tts_is_threadsafe(void)
 #ifdef H5_HAVE_THREADSAFE
     is_ts     = FALSE;
     should_be = TRUE;
-#else  /* H5_HAVE_THREADSAFE */
+#else /* H5_HAVE_THREADSAFE */
     is_ts     = TRUE;
     should_be = FALSE;
 #endif /* H5_HAVE_THREADSAFE */
@@ -134,7 +134,7 @@ main(int argc, char *argv[])
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
+    if (GetTestCleanup() && !HDgetenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
     /* Release test infrastructure */

@@ -2126,7 +2126,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
             /* Decrement number of blocks */
             fast_dim_count--;
         } /* end while */
-#else     /* NO_DUFFS_DEVICE */
+#else /* NO_DUFFS_DEVICE */
         {
             size_t duffs_index; /* Counting index for Duff's device */
 
@@ -2138,31 +2138,38 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                 case 0:
                     do {
                         DUFF_GUTS
+                        /* FALLTHROUGH */
                         H5_ATTR_FALLTHROUGH
                         case 7:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 6:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 5:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 4:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 3:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 2:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 1:
                             DUFF_GUTS
                     } while (--duffs_index > 0);
             } /* end switch */
         }
-#endif    /* NO_DUFFS_DEVICE */
+#endif /* NO_DUFFS_DEVICE */
 #undef DUFF_GUTS
 
         /* Increment offset in destination buffer */
@@ -4766,13 +4773,13 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
 --------------------------------------------------------------------------*/
 herr_t
 H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks,
-                              hsize_t buf[/*numblocks*/])
+                              hsize_t buf[/*numblocks*/] /*out*/)
 {
     H5S_t *space;     /* Dataspace to modify selection of */
     herr_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
+    H5TRACE4("e", "ihhx", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if (buf == NULL)
@@ -10101,7 +10108,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
         case H5S_SEL_POINTS:          /* Can't combine hyperslab operations and point selections currently */
             if (op == H5S_SELECT_SET) /* Allow only "set" operation to proceed */
                 break;
-            /* Else fall through to error */
+            /* FALLTHROUGH (to error) */
             H5_ATTR_FALLTHROUGH
 
         case H5S_SEL_ERROR:
@@ -11742,7 +11749,7 @@ done:
 
         for (u = 0; u < H5S_MAX_RANK; u++)
             HDassert(!udata.ps_span_info[u]);
-    }  /* end block */
+    } /* end block */
 #endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -12351,14 +12358,15 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[])
+H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[] /*out*/, hsize_t stride[] /*out*/,
+                         hsize_t count[] /*out*/, hsize_t block[] /*out*/)
 {
     H5S_t *  space;               /* Dataspace to query */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*h*h*h*h", spaceid, start, stride, count, block);
+    H5TRACE5("e", "ixxxx", spaceid, start, stride, count, block);
 
     /* Check args */
     if (NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))

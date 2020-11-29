@@ -4195,7 +4195,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 
     /* Free memb_name */
     for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-        free(memb_name[mt]);
+        HDfree(memb_name[mt]);
 
     return 0;
 
@@ -7847,7 +7847,7 @@ test_file(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     test_file_ishdf5(env_h5_drvr); /* Test detecting HDF5 files correctly */
     test_deprec();                 /* Test deprecated routines */
-#endif                             /* H5_NO_DEPRECATED_SYMBOLS */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");
