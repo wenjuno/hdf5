@@ -3,8 +3,8 @@
 #include "testphdf5.h"
 #include "H5Dprivate.h" /* For Chunk tests */
 
-#define BIGIO_COLLECTIVE_FILE   "bigio_test"
-#define BIGIO_INDEPENDENT_FILE  "single_rank_independent_io"
+#define BIGIO_COLLECTIVE_FILE  "bigio_test"
+#define BIGIO_INDEPENDENT_FILE "single_rank_independent_io"
 
 /* Constants definitions */
 #define MAX_ERR_REPORT 10 /* Maximum number of errors reported */
@@ -24,9 +24,9 @@
 #define DATASET2             "DSET2"
 #define DATASET3             "DSET3"
 #define DATASET4             "DSET4"
-#define FILENAME_LEN         1024       /* length of file name */
-#define DXFER_COLLECTIVE_IO  0x1        /* Collective IO*/
-#define DXFER_INDEPENDENT_IO 0x2        /* Independent IO collectively */
+#define FILENAME_LEN         1024 /* length of file name */
+#define DXFER_COLLECTIVE_IO  0x1  /* Collective IO*/
+#define DXFER_INDEPENDENT_IO 0x2  /* Independent IO collectively */
 #define DXFER_BIGCOUNT       (1 < 29)
 #define LARGE_DIM            1610612736
 
@@ -46,8 +46,8 @@ static int mpi_size_g, mpi_rank_g;
 hsize_t space_dim1 = SPACE_DIM1 * 256; // 4096
 hsize_t space_dim2 = SPACE_DIM2;
 
-static void coll_chunktest(int chunk_factor, int select_factor, int api_option,
-                           int file_selection, int mem_selection, int mode);
+static void coll_chunktest(int chunk_factor, int select_factor, int api_option, int file_selection,
+                           int mem_selection, int mode);
 
 /*
  * Setup the coordinates for point selection.
@@ -146,7 +146,6 @@ point_set(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[], s
         }
     }
 }
-
 
 /*
  * Print the content of the dataset.
@@ -449,7 +448,7 @@ ccdataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block
 static void
 test_file_delete(void)
 {
-    herr_t ret = SUCCEED;
+    herr_t ret     = SUCCEED;
     hid_t  fapl_id = h5_fileaccess();
     char   filename[FILENAME_LEN]; /* Filename to use */
     h5_fixname(BIGIO_COLLECTIVE_FILE, fapl_id, filename, sizeof(filename));
@@ -1129,7 +1128,7 @@ single_rank_independent_io(void)
 {
 
     hid_t fapl_id = -1;
-    char  filename[FILENAME_LEN];    /* Filename to use */
+    char  filename[FILENAME_LEN]; /* Filename to use */
 
     if (mpi_rank_g == 0)
         HDprintf("\nSingle Rank Independent I/O\n");
@@ -1185,7 +1184,6 @@ single_rank_independent_io(void)
 
     MPI_Barrier(MPI_COMM_WORLD);
     H5Pclose(fapl_id);
-
 }
 
 /*
@@ -1280,15 +1278,15 @@ coll_chunk1(void)
     if (mpi_rank_g == 0)
         HDprintf("\nCollective chunk I/O Test #1\n");
 
-    coll_chunktest( 1, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_CONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_CONT, API_NONE, POINT, POINT, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_CONT, API_NONE, POINT, HYPER, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, POINT, POINT, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, POINT, HYPER, OUT_OF_ORDER);
 
-    coll_chunktest( 1, BYROW_CONT, API_NONE, POINT, ALL, IN_ORDER);
-    coll_chunktest( 1, BYROW_CONT, API_NONE, POINT, POINT, IN_ORDER);
-    coll_chunktest( 1, BYROW_CONT, API_NONE, POINT, HYPER, IN_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, POINT, ALL, IN_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, POINT, POINT, IN_ORDER);
+    coll_chunktest(1, BYROW_CONT, API_NONE, POINT, HYPER, IN_ORDER);
 }
 
 /*-------------------------------------------------------------------------
@@ -1332,15 +1330,15 @@ coll_chunk2(void)
     if (mpi_rank_g == 0)
         HDprintf("\nCollective chunk I/O Test #2\n");
 
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, POINT, POINT, OUT_OF_ORDER);
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, POINT, HYPER, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, POINT, POINT, OUT_OF_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, POINT, HYPER, OUT_OF_ORDER);
 
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, POINT, ALL, IN_ORDER);
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, POINT, POINT, IN_ORDER);
-    coll_chunktest( 1, BYROW_DISCONT, API_NONE, POINT, HYPER, IN_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, POINT, ALL, IN_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, POINT, POINT, IN_ORDER);
+    coll_chunktest(1, BYROW_DISCONT, API_NONE, POINT, HYPER, IN_ORDER);
 }
 
 /*-------------------------------------------------------------------------
@@ -1383,15 +1381,15 @@ coll_chunk3(void)
     if (mpi_rank_g == 0)
         HDprintf("\nCollective chunk I/O Test #3\n");
 
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, POINT, POINT, OUT_OF_ORDER);
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, POINT, HYPER, OUT_OF_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, HYPER, HYPER, OUT_OF_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, HYPER, POINT, OUT_OF_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, POINT, ALL, OUT_OF_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, POINT, POINT, OUT_OF_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, POINT, HYPER, OUT_OF_ORDER);
 
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, POINT, ALL, IN_ORDER);
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, POINT, POINT, IN_ORDER);
-    coll_chunktest( mpi_size_g, BYROW_CONT, API_NONE, POINT, HYPER, IN_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, POINT, ALL, IN_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, POINT, POINT, IN_ORDER);
+    coll_chunktest(mpi_size_g, BYROW_CONT, API_NONE, POINT, HYPER, IN_ORDER);
 }
 
 //-------------------------------------------------------------------------
@@ -1416,10 +1414,10 @@ coll_chunk3(void)
  */
 
 static void
-coll_chunktest(int chunk_factor, int select_factor, int api_option, int file_selection,
-               int mem_selection, int mode)
+coll_chunktest(int chunk_factor, int select_factor, int api_option, int file_selection, int mem_selection,
+               int mode)
 {
-    char  filename[FILENAME_LEN];    /* Filename to use */
+    char  filename[FILENAME_LEN]; /* Filename to use */
     hid_t file, dataset, file_dataspace, mem_dataspace;
     hid_t acc_plist, xfer_plist, crp_plist;
 
@@ -1445,7 +1443,7 @@ coll_chunktest(int chunk_factor, int select_factor, int api_option, int file_sel
     acc_plist = create_faccess_plist(comm, info, facc_type);
     VRFY_G((acc_plist >= 0), "");
 
-	h5_fixname(BIGIO_COLLECTIVE_FILE, acc_plist, filename, sizeof(filename));
+    h5_fixname(BIGIO_COLLECTIVE_FILE, acc_plist, filename, sizeof(filename));
 
     file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_plist);
     VRFY_G((file >= 0), "H5Fcreate succeeded");
@@ -1912,7 +1910,7 @@ main(int argc, char **argv)
     TestAlarmOff();
 
     if (mpi_rank_g == 0)
-       test_file_delete();
+        test_file_delete();
 
     /* close HDF5 library */
     H5close();
