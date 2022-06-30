@@ -1118,6 +1118,7 @@ H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operato
     H5B_shared_t * shared;                   /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;              /* User-data for metadata cache callback */
     unsigned       u;                        /* Local index variable */
+    haddr_t        next_addr;                /* Local address variable */
     herr_t         ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1141,18 +1142,39 @@ H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operato
     cache_udata.f         = f;
     cache_udata.type      = type;
     cache_udata.rc_shared = rc_shared;
-    if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load B-tree node")
 
-    /* Iterate over node's children */
-    for (u = 0; u < bt->nchildren && ret_value == H5_ITER_CONT; u++) {
-        if (bt->level > 0)
-            ret_value = H5B__iterate_helper(f, type, bt->child[u], op, udata);
-        else
-            ret_value = (*op)(f, H5B_NKEY(bt, shared, u), bt->child[u], H5B_NKEY(bt, shared, u + 1), udata);
-        if (ret_value < 0)
-            HERROR(H5E_BTREE, H5E_BADITER, "B-tree iteration failed");
-    } /* end for */
+    /* Find the the left-most node on the lowest level */
+    while (true) {
+      if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
+          HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load B-tree node")
+      if (0 == bt->level)
+        break;
+      next_addr = bt->child[0];
+      if (H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+          HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
+      bt = NULL;
+      addr = next_addr;
+    }
+
+    while (true) {
+      /* Iterate over node's children */
+      for (u = 0; u < bt->nchildren && ret_value == H5_ITER_CONT; u++) {
+          ret_value = (*op)(f, H5B_NKEY(bt, shared, u), bt->child[u], H5B_NKEY(bt, shared, u + 1), udata);
+          if (ret_value < 0)
+              HERROR(H5E_BTREE, H5E_BADITER, "B-tree iteration failed");
+      } /* end for */
+
+      /* Continue to node's right sibling */
+      next_addr = bt->right;
+      if (HADDR_UNDEF == next_addr)
+        break;
+      if (H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+          HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to release B-tree node")
+      bt = NULL;
+      addr = next_addr;
+      if (NULL == (bt = (H5B_t *)H5AC_protect(f, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
+          HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load right sibling B-tree node")
+    }
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
